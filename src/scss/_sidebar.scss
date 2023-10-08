@@ -1,0 +1,16 @@
+.sidebar{
+    background: rgb(8,26,41);
+background: linear-gradient(175deg, rgba(8,26,41,1) 0%, rgba(25,235,59,1) 0%, rgba(7,138,28,1) 55%);
+min-height: 100vh;
+.dashboard{
+    color: white;
+    padding: 10 10px;
+    >span{
+        font-size: 20px;
+    }
+    .icon{
+        margin-right: 20px;
+    }
+}
+}
+  

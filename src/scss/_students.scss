@@ -1,0 +1,44 @@
+
+
+.students{
+    width: 100%;
+    .top-section{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        .title{
+            @media (max-width:600px) {
+                font-size: 22px;
+            }
+            font-size: 30px;
+        }
+        .button{
+            @media (max-width:600px) {
+                font-size: 13px;
+                padding: 5px;
+            }
+            font-size: 15px;
+        }
+    }
+   .card{
+    border-radius: 20px;
+        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+        border: 0px;
+    .table{
+        
+        th{
+            padding: 10px 0px;
+            font-size: large;
+        }
+        td{
+            padding: 10px 10px;
+        }
+    }
+   }
+    .centered-modal {
+        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+}
