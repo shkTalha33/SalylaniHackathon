@@ -8,10 +8,13 @@ import {
   Modal,
   message,
   Select,
+  DatePicker,
+  Tooltip,
+  Divider,
 } from "antd";
 import { doc, setDoc,collection, getDocs, deleteDoc } from "firebase/firestore";
 import { firestore } from "../../config/Firebase";
-import dayjs from 'dayjs';
+import {  AiFillDelete } from "react-icons/ai";
 
 
 
@@ -21,7 +24,10 @@ export default function Students() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [attendence, setAttendence] = useState([]);
+  const [isProcessingDelete, setIsProcessingDelete] = useState(false);
   const [courses, setCourses] = useState([]);
+  const [date, setDate] = useState("");
+  const [section, setSection] = useState("");
   const [courseValue, setCourseValue] = useState("");
   const [attendenceValue, setAttendenceValue] = useState("");
 
@@ -29,20 +35,39 @@ export default function Students() {
   const handleChange = (value) => {
     setAttendenceValue(value);
   };
+  const handleDate = (_, date) => setDate(s => ({ ...s, date }))
   const handleCourse = (value) => {
     setCourseValue(value)
   };
-  console.log(courseValue)
+
+
+  const handleDelete = async (attend) => {
+    setIsProcessingDelete(true);
+    try {
+      await deleteDoc(doc(firestore, "attendence", attend.id));
+      let newStudents = attendence.filter((doc) => {
+        return attend.id !== doc.id;
+      });
+      setAttendence(newStudents);
+      message.success("Student has been deleted successfully");
+    } catch (error) {
+      console.error(error);
+      message.error("Something went wrong");
+    }
+    setIsProcessingDelete(false);
+  };
+
   const handleFinish = async (values) => {
-    const { name, rollno, course } = values;
+    const { name, rollno } = values;
     const randomId = Math.random().toString(36).slice(2);
     const formData = {
       name,
+      date:date,
+      section,
      attendence :attendenceValue,
       rollno,
       course:courseValue,
       id: randomId,
-      dateCreated: new Date().getTime()
     };
     console.log(formData)
     setIsLoading(true);
@@ -115,6 +140,8 @@ const getStudents = async() => {
               </div>
               </div>
             </div>
+            <Divider  />
+
             <div className="row mt-5">
               <div className=" col-12 col-md-10 m-auto">
         <Card className="card">
@@ -128,8 +155,10 @@ const getStudents = async() => {
                         <th>Name</th>
                         <th>RollNo</th>
                         <th>Course</th>
+                        <th>Section</th>
                         <th>Date</th>
                         <th>Attendence</th>
+                        <th>Delete</th>
                       </tr>
                     </thead>
                     <tbody >
@@ -139,8 +168,22 @@ const getStudents = async() => {
                           <td>{student.name}</td>
                           <td style={{fontWeight:600}}>{student.rollno}</td>
                           <td>{student.course}</td>
-                          <td>{dayjs(student.dateCreated).format('DD/MM/YYYY')}</td>
+                          <td>{student.section}</td>
+                          <td>{student.date.date}</td>
                           <td>{student.attendence}</td>
+                          <td>
+                             <Tooltip title="Delete" color="red">
+                                      <Button
+                                        className="btn btn-danger"
+                                        size="large"
+                                        icon={<AiFillDelete />}
+                                        loading={isProcessingDelete}
+                                        disabled={isProcessingDelete}
+                                        onClick={() => {
+                                          handleDelete(student);
+                                        }}
+                                      />
+                                    </Tooltip></td>
                         </tr>
                          )
                       })}
@@ -212,13 +255,38 @@ onOk={() => {
   ]}
   hasFeedback
   onChange={handleCourse} 
-  value={courseValue}
+ 
 >
   {courses.map((course) => (
-    <Select.Option  key={course.id} value={course.title}>
+    <Select.Option  key={course.id} value={course.title} >
       {course.title}
     </Select.Option>
   ))}
+</Select>
+<Select
+  className="w-100 mb-5"
+  placeholder="Select Section"
+  label="Section"
+  name="section"
+  rules={[
+    {
+      required: true,
+      message: "Please select a Section",
+    },
+  ]}
+  hasFeedback
+  onChange={section => setSection(section)}
+>
+  
+    <Select.Option  value="A">
+      A
+    </Select.Option>
+    <Select.Option  value="B">
+      B
+    </Select.Option>
+    <Select.Option  value="C">
+      C
+    </Select.Option>
 </Select>
 <Select
   className="w-100 mb-5"
@@ -232,7 +300,9 @@ onOk={() => {
     },
   ]}
   hasFeedback
-  onChange={handleChange} 
+  
+  onChange={handleChange}
+  
 >
   
     <Select.Option  value="present">
@@ -242,6 +312,11 @@ onOk={() => {
       Absent
     </Select.Option>
 </Select>
+<Form.Item name="date"  rules={[
+  {required:true,message:"Please enter date "}
+]}>
+   <DatePicker className="w-100" name="date" placeholder="Select Date" onChange={handleDate} />
+</Form.Item>
 
   <Form.Item className="text-center">
     <Button
